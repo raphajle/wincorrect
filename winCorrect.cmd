@@ -4,7 +4,7 @@ set opn0=Menu
 set opn1=Disk
 set opn2=Windows
 set opn3=Network
-set opn4=AntiMalware
+set opn4=Update
 set opn5=Fermer
 set msg=0
 
@@ -20,7 +20,7 @@ echo.
 echo  1. Verification de Disque
 echo  2. Correction du Systeme d'exploitation ( OS )
 echo  3. Netoyage et verification reseau
-echo  4. Scanner un disk ( AntiMalware Scripts )
+echo  4. Mise a jour du script
 echo  5. Fermer le script
 echo.
 set /p op=Veuillez choisir une operation : 
@@ -50,12 +50,15 @@ set msg=le repertoire %d% est invalide
 if not exist %d%: goto err
 set msg=0
 
-chkdsk %d%: /F /R
+set mods=/F
+set AE=y
+set /p AE=Reparer le disk (%d%) [Y/N]:_
+if %AE% EQU Y set mods=/F /R
+if %AE% EQU y set mods=/F /R
+chkdsk %d%: %mods%
 
 pause
 goto end
-
-
 
 
 :windows
@@ -115,7 +118,7 @@ goto end
 
 
 
-:AntiMalware
+:Update
 set /a sec=4
 goto head
 :sec4
@@ -125,16 +128,6 @@ echo  0. Pour revenir au menu
 set d=NONE
 set /p d=Veuillez choisir un disque [D,E,F,...] : 
 if %d% EQU 0 goto start
-
-set tr=AntiMalware
-set msg=le repertoire ( %d%:\ ) est invalide
-if not exist %d%: goto err
-if %d% EQU C goto err
-if %d% EQU c goto err
-set msg=0
-
-attrib -H -S -R /S /D %d%:
-del /F /Q /S *.com *.lnk *.exe 
 
 pause
 goto end
@@ -156,8 +149,12 @@ goto end
 :head
 cls
 call set opn=%%opn%op%%%
-ver
 echo WinCorrect [ %opn% ]
+echo par: RAPHAJLE
+echo      www.github.com/raphajle/wincorrect
+echo      https://github.com/raphajle/wincorrect/archive/refs/heads/main.zip
+ver
+
 if %msg% NEQ 0 echo %msg%
 set msg=0
 goto sec%sec%
