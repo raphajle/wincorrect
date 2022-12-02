@@ -9,7 +9,7 @@ set opn4=Update
 set opn5=Fermer
 set msg=0
 
-rem if %cd% NEQ %windir%\system32 echo  WinCorrect " Access refuser " (run as admin) && pause && exit
+rem if /I %cd% NEQ %windir%\system32 echo  WinCorrect " Access refuser " (run as admin) && pause && exit
 
 :start
 set /a op=0
@@ -53,35 +53,29 @@ set msg=0
 
 set AE=y
 set /p AE=Lancer la verification du disk (%d%:) [Y/N]:_
-if %AE% EQU N goto diskX
-if %AE% EQU n goto diskX
-if %AE% NEQ y goto end
-if %AE% NEQ Y goto end
+if /I %AE% EQU N goto diskX
+if /I %AE% NEQ Y goto end
 
 set mods=/F
 set /p AE=Reparer le disk (%d%:) [Y/N]:_
-if %AE% EQU Y set mods=%mods% /R
-if %AE% EQU y set mods=%mods% /R
+if /I %AE% EQU Y set mods=%mods% /R
 chkdsk %d%: %mods%
 
 
 :diskX
-if %d% EQU C goto end
-if %d% EQU c goto end
+if /I %d% EQU C goto end
 set /P qes=Lancer le ShortkutRemover [y/n]:_
-if %qes% EQU n goto end
-if %qes% EQU N goto end
-if %qes% NEQ y goto end
-if %qes% NEQ Y goto end
+if /I %qes% EQU N goto end
+if /I %qes% NEQ Y goto end
 
 %d%:
 set exts=*.lnk *.bat
 set AE=y
 set /P AE=Ajouter les fichier (.exe) [y/n]:_
-if %AE% EQU y set exts=%exts% *.exe
+if /I %AE% EQU y set exts=%exts% *.exe
 
 set /P AE=Ajouter les fichier (.js) [y/n]:_
-if %AE% EQU y set exts=%exts% *.js
+if /I %AE% EQU y set exts=%exts% *.js
 
 attrib -H -S -R /S /D
 del /F /Q /S %exts%
@@ -169,10 +163,8 @@ goto head
 :sec990
 echo.
 set /p op=Voulez vous fermer le script ? [Y/N]: 
-if %op% EQU N goto start
-if %op% EQU n goto start
-if %op% EQU Y exit
-if %op% EQU y exit
+if /I %op% EQU N goto start
+if /I %op% EQU Y exit
 goto end
 
 
