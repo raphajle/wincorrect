@@ -1,5 +1,6 @@
 @echo off
 color 0b
+set vers=2.0
 set opn0=Menu
 set opn1=Disk
 set opn2=Windows
@@ -8,7 +9,7 @@ set opn4=Update
 set opn5=Fermer
 set msg=0
 
-if %cd% NEQ %windir%\system32 echo  WinCorrect " Access refuser " (run as admin) && pause && exit
+rem if %cd% NEQ %windir%\system32 echo  WinCorrect " Access refuser " (run as admin) && pause && exit
 
 :start
 set /a op=0
@@ -29,7 +30,7 @@ if %op% LSS 1 goto start
 if %op% EQU 1 goto disk
 if %op% EQU 2 goto windows
 if %op% EQU 3 goto network
-if %op% EQU 4 goto AntiMalware
+if %op% EQU 4 goto Update
 if %op% EQU 5 goto end
 if %op% GTR 5 goto start
 pause
@@ -149,15 +150,17 @@ goto end
 set /a sec=4
 goto head
 :sec4
-
 echo.
-echo   0. Pour revenir au menu
+echo   Version actuel : ( WinCorrect %vers% )
+echo.
+echo   0. Revenir au menu
+echo   1. Telecharger WinCorrect
+echo.
 set d=NONE
 set /p d=Veuillez choisir un disque [D,E,F,...] : 
 if %d% EQU 0 goto start
-
-pause
-goto end
+if %d% EQU 1 start https://www.github.com/raphajle/wincorrect
+goto Update
 
 
 :end
@@ -176,10 +179,9 @@ goto end
 :head
 cls
 call set opn=%%opn%op%%%
-echo  WinCorrect [ %opn% ]
-echo  par: RAPHAJLE
-echo       www.github.com/raphajle/wincorrect
-echo       https://github.com/raphajle/wincorrect/archive/refs/heads/main.zip
+echo  WinCorrect (%vers%) [ %opn% ]
+echo  Auteur : RAPHAJLE
+echo  Site web : https://www.github.com/raphajle/wincorrect
 ver
 
 if %msg% NEQ 0 echo  %msg%
