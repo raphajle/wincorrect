@@ -1,15 +1,13 @@
 @echo off
 color 0b
-set vers=2.0
-set opn0=Menu
+set opn0=Operations
 set opn1=Disk
 set opn2=Windows
 set opn3=Network
-set opn4=Update
-set opn5=Fermer
+set opn4=Fermer
 set msg=0
 
-rem if /I %cd% NEQ %windir%\system32 echo  WinCorrect " Access refuser " (run as admin) && pause && exit
+net.exe session 1>NUL 2>NUL || (Echo  WinCorrect " Access refuser " {run as admin}. & pause & Exit /b 1)
 
 :start
 set /a op=0
@@ -18,11 +16,10 @@ goto head
 :sec0
 
 echo.
-echo   1. Verification de Disque
-echo   2. Correction du Systeme d'exploitation ( OS )
-echo   3. Netoyage et verification reseau
-echo   4. Mise a jour du script
-echo   5. Fermer le script
+echo  1. Verification de Disque
+echo  2. Correction du Systeme d'exploitation ( OS )
+echo  3. Netoyage et verification reseau
+echo  4. Fermer le script
 echo.
 set /p op=Veuillez choisir une operation : 
 
@@ -30,9 +27,8 @@ if %op% LSS 1 goto start
 if %op% EQU 1 goto disk
 if %op% EQU 2 goto windows
 if %op% EQU 3 goto network
-if %op% EQU 4 goto Update
-if %op% EQU 5 goto end
-if %op% GTR 5 goto start
+if %op% EQU 4 goto end
+if %op% GTR 4 goto start
 pause
 
 :disk
@@ -41,154 +37,80 @@ goto head
 :sec1
 
 echo.
-echo   0. Pour revenir au menu
+echo  0. Pour revenir au menu
 set d=vide
-set /p d=Veuillez choisir un disque [D,E,F,...] : 
+set /p d=Veuillez choisir un disque : 
 if %d% EQU 0 goto start
-
-set tr=disk
-set msg=le repertoire %d% est invalide
-if not exist %d%: goto err
-set msg=0
-
-set AE=y
-set /p AE=Lancer la verification du disk (%d%:) [Y/N]:_
-if /I %AE% EQU N goto diskX
-if /I %AE% NEQ Y goto end
-
-set mods=/F
-set /p AE=Reparer le disk (%d%:) [Y/N]:_
-if /I %AE% EQU Y set mods=%mods% /R
-chkdsk %d%: %mods%
-
-
-:diskX
-if /I %d% EQU C goto end
-set /P qes=Lancer le ShortkutRemover [y/n]:_
-if /I %qes% EQU N goto end
-if /I %qes% NEQ Y goto end
-
-%d%:
-set exts=*.lnk *.bat
-set AE=y
-set /P AE=Ajouter les fichier (.exe) [y/n]:_
-if /I %AE% EQU y set exts=%exts% *.exe
-
-set /P AE=Ajouter les fichier (.js) [y/n]:_
-if /I %AE% EQU y set exts=%exts% *.js
-
-attrib -H -S -R /S /D
-del /F /Q /S %exts%
+if not exist %d%: goto err1
+chkdsk %d%: /F /R
 pause
 goto end
 
+:err1
+cls
+color 04
+echo repertoire %d% invalid
+pause
+color 0b
+goto disk
+
 
 :windows
-set /a sec=2
-goto head
-:sec2
-
-echo  connexion internet requise
+echo connexion internet requise
 pause
 
 cls
-echo  Etape 1 / 3 : Verification simple
+echo Etape 1 / 3 : Verification simple
 sfc /scannow 
 
 cls
-echo  Etape 2 / 3 : Verification avancer
+echo Etape 2 / 3 : Verification avancer
 dism /Online /Cleanup-Image /RestoreHealth 
 
 
 cls
-echo  Etape 3 / 3 : Finalisation
+echo Etape 3 / 3 : Finalisation
 sfc /scannow
 
 pause
 goto end
 
 
-
-
-
 :network
-set /a sec=3
-goto head
-:sec3
-
-echo  Connexion internet requise
+echo Votre connexion internet sera suspendue.
 pause
 
-echo  Votre connexion internet sera suspendue.
-pause
-
-echo  Suspension de la connexion internet.
+echo Suspension de la connexion internet.
 ipconfig /release
 TIMEOUT 5 /nobreak
 
-echo  Restauration de la connexion internet.
+echo Restauration de la connexion internet.
 ipconfig /renew
 TIMEOUT 5 /nobreak
 
-echo  finalisation.
+echo finalisation.
 ipconfig /flushdns
 
-echo  Restauration terminer.
+echo Restauration Terminer.
 pause
-goto end
-
-
-
-
-:Update
-set /a sec=4
-goto head
-:sec4
-echo.
-echo   Version actuel : ( WinCorrect %vers% )
-echo.
-echo   0. Revenir au menu
-echo   1. Telecharger WinCorrect
-echo.
-set d=NONE
-set /p d=Veuillez choisir un disque [D,E,F,...] : 
-if %d% EQU 0 goto start
-if %d% EQU 1 start https://www.github.com/raphajle/wincorrect
-goto Update
-
 
 :end
-set /a sec=990
+set /a sec=10
 goto head
-:sec990
+:sec10
 echo.
 set /p op=Voulez vous fermer le script ? [Y/N]: 
-if /I %op% EQU N goto start
-if /I %op% EQU Y exit
+if %op% EQU N goto start
+if %op% EQU n goto start
+if %op% EQU Y exit
+if %op% EQU y exit
 goto end
 
 
 :head
 cls
 call set opn=%%opn%op%%%
-echo  WinCorrect (%vers%) [ %opn% ]
-echo  Auteur : RAPHAJLE
-echo  Site web : https://www.github.com/raphajle/wincorrect
 ver
-
-if %msg% NEQ 0 echo  %msg%
-set msg=0
+echo WinCorrect [ %opn% ]
+if %msg% NEQ 0 echo %msg%
 goto sec%sec%
-
-:err
-cls
-color 04
-call set opn=%%opn%op%%%
-ver
-echo  WinCorrect [ %opn% ]
-echo.
-echo  %msg%
-set msg=0
-pause
-color 0b
-goto %tr%
