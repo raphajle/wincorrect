@@ -1,13 +1,13 @@
 @echo off
 color 0b
-set opn0=Operations
+set opn0=Menu
 set opn1=Disk
 set opn2=Windows
 set opn3=Network
 set opn4=Fermer
 set msg=0
 
-net.exe session 1>NUL 2>NUL || (Echo  WinCorrect " Access refuser " {run as admin}. & pause & Exit /b 1)
+if %cd% NEQ %windir%\system32 echo WinCorrect " Access refuser " (run as admin) && pause && exit
 
 :start
 set /a op=0
@@ -28,7 +28,7 @@ if %op% EQU 1 goto disk
 if %op% EQU 2 goto windows
 if %op% EQU 3 goto network
 if %op% EQU 4 goto end
-if %op% GTR 4 goto start
+if %op% GTR 5 goto start
 pause
 
 :disk
@@ -39,23 +39,47 @@ goto head
 echo.
 echo  0. Pour revenir au menu
 set d=vide
-set /p d=Veuillez choisir un disque : 
+set /p d=Veuillez choisir un disque [D,E,F,...] : 
 if %d% EQU 0 goto start
+
+set tr=disk
+set msg=le repertoire %d% est invalide
+if not exist %d%: goto err
+set msg=0
+
 if not exist %d%: goto err1
+
+set /p virchk=Voulez-vous supprimer les fichiers scripts malveillants [Y/N] : 
+if /i %virchk% NEQ Y set virchk=N
+if /i %virchk% EQU N goto dchk
+attrib -s -h -r /s /d %d%:\*.*
+
+set /p virchk=Voulez-vous supprimer les fichiers "JS" [Y/N] : 
+if /i %virchk% NEQ Y set virchk=N
+if /i %virchk% EQU Y del %d%:\*.js /F /S
+
+set /p virchk=Voulez-vous supprimer les script "BAT" [Y/N] : 
+if /i %virchk% NEQ Y set virchk=N
+if /i %virchk% EQU Y del %d%:\*.bat /F /S
+
+set /p virchk=Voulez-vous supprimer les fichiers "INF" [Y/N] : 
+if /i %virchk% NEQ Y set virchk=N
+if /i %virchk% EQU Y del %d%:\*.inf
+
+:dchk
 chkdsk %d%: /F /R
+
 pause
 goto end
 
-:err1
-cls
-color 04
-echo repertoire %d% invalid
-pause
-color 0b
-goto disk
+
 
 
 :windows
+set /a sec=2
+goto head
+:sec2
+
 echo connexion internet requise
 pause
 
@@ -76,7 +100,17 @@ pause
 goto end
 
 
+
+
+
 :network
+set /a sec=3
+goto head
+:sec3
+
+echo Connexion internet requise
+pause
+
 echo Votre connexion internet sera suspendue.
 pause
 
@@ -91,13 +125,42 @@ TIMEOUT 5 /nobreak
 echo finalisation.
 ipconfig /flushdns
 
-echo Restauration Terminer.
+echo Restauration terminer.
 pause
+goto end
+
+
+
+
+:AntiMalware
+set /a sec=4
+goto head
+:sec4
+
+echo.
+echo  0. Pour revenir au menu
+set d=NONE
+set /p d=Veuillez choisir un disque [D,E,F,...] : 
+if %d% EQU 0 goto start
+
+set tr=AntiMalware
+set msg=le repertoire ( %d%:\ ) est invalide
+if not exist %d%: goto err
+if %d% EQU C goto err
+if %d% EQU c goto err
+set msg=0
+
+attrib -H -S -R /S /D %d%:
+del /F /Q /S *.com *.lnk *.exe 
+
+pause
+goto end
+
 
 :end
-set /a sec=10
+set /a sec=990
 goto head
-:sec10
+:sec990
 echo.
 set /p op=Voulez vous fermer le script ? [Y/N]: 
 if %op% EQU N goto start
@@ -113,4 +176,18 @@ call set opn=%%opn%op%%%
 ver
 echo WinCorrect [ %opn% ]
 if %msg% NEQ 0 echo %msg%
+set msg=0
 goto sec%sec%
+
+:err
+cls
+color 04
+call set opn=%%opn%op%%%
+ver
+echo WinCorrect [ %opn% ]
+echo.
+echo %msg%
+set msg=0
+pause
+color 0b
+goto %tr%
