@@ -7,7 +7,7 @@ set opn3=Network
 set opn4=Fermer
 set msg=0
 
-if %cd% NEQ %windir%\system32 echo WinCorrect " Access refuser " (run as admin) && pause && exit
+net.exe session 1>NUL 2>NUL || (Echo WinCorrect " Access denied " { please run as administrator }. & pause & exit /b 1)
 
 :start
 set /a op=0
@@ -71,8 +71,6 @@ chkdsk %d%: /F /R
 
 pause
 goto end
-
-
 
 
 :windows
