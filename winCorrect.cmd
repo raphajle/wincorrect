@@ -67,6 +67,9 @@ if /i %virchk% NEQ Y set virchk=N
 if /i %virchk% EQU Y del %d%:\*.inf
 
 :dchk
+set /p virchk=Voulez-vous reparer le disque "%d%:" [Y/N] : 
+if /i %virchk% NEQ Y set virchk=N
+if /i %virchk% EQU N goto end
 chkdsk %d%: /F /R
 
 pause
